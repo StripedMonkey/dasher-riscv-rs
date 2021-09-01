@@ -1,6 +1,7 @@
 use std::fmt;
 
 // This macro is zero indexed
+#[macro_export]
 macro_rules! extract_bits {
     ($data:ident[$offset:expr]) => { // type[start]
         (($data  >> $offset) & 1)
@@ -27,7 +28,7 @@ macro_rules! extract_bits {
     };
 }
 
-fn sign_extend(instruction: i32, offset: usize) -> i32 {
+pub(crate) fn sign_extend(instruction: i32, offset: usize) -> i32 {
     // shift left all but the last n bits
     let shifted = instruction << (32 - offset);
     // as a signed integer shift back
@@ -37,192 +38,192 @@ fn sign_extend(instruction: i32, offset: usize) -> i32 {
 pub(crate) enum Instruction {
     LUI {
         imm: i32,
-        rd: i32,
+        rd: usize,
     },
     AUIPC {
         imm: i32,
-        rd: i32,
+        rd: usize,
     },
     JAL {
         imm: i32,
-        rd: i32,
+        rd: usize,
     },
     JALR {
         imm: i32,
-        rs1: i32,
-        rd: i32,
+        rs1: usize,
+        rd: usize,
     },
     BEQ {
         imm: i32,
-        rs2: i32,
-        rs1: i32,
+        rs2: usize,
+        rs1: usize,
     },
     BNE {
         imm: i32,
-        rs2: i32,
-        rs1: i32,
+        rs2: usize,
+        rs1: usize,
     },
     BLT {
         imm: i32,
-        rs2: i32,
-        rs1: i32,
+        rs2: usize,
+        rs1: usize,
     },
     BGE {
         imm: i32,
-        rs2: i32,
-        rs1: i32,
+        rs2: usize,
+        rs1: usize,
     },
     BLTU {
         imm: i32,
-        rs2: i32,
-        rs1: i32,
+        rs2: usize,
+        rs1: usize,
     },
     BGEU {
         imm: i32,
-        rs2: i32,
-        rs1: i32,
+        rs2: usize,
+        rs1: usize,
     },
     LB {
         imm: i32,
-        rs1: i32,
-        rd: i32,
+        rs1: usize,
+        rd: usize,
     },
     LH {
         imm: i32,
-        rs1: i32,
-        rd: i32,
+        rs1: usize,
+        rd: usize,
     },
     LW {
         imm: i32,
-        rs1: i32,
-        rd: i32,
+        rs1: usize,
+        rd: usize,
     },
     LBU {
         imm: i32,
-        rs1: i32,
-        rd: i32,
+        rs1: usize,
+        rd: usize,
     },
     LHU {
         imm: i32,
-        rs1: i32,
-        rd: i32,
+        rs1: usize,
+        rd: usize,
     },
     SB {
         imm: i32,
-        rs2: i32,
-        rs1: i32,
+        rs2: usize,
+        rs1: usize,
     },
     SH {
         imm: i32,
-        rs2: i32,
-        rs1: i32,
+        rs2: usize,
+        rs1: usize,
     },
     SW {
         imm: i32,
-        rs2: i32,
-        rs1: i32,
+        rs2: usize,
+        rs1: usize,
     },
     ADDI {
         imm: i32,
-        rs1: i32,
-        rd: i32,
+        rs1: usize,
+        rd: usize,
     },
     SLTI {
         imm: i32,
-        rs1: i32,
-        rd: i32,
+        rs1: usize,
+        rd: usize,
     },
     SLTIU {
         imm: i32,
-        rs1: i32,
-        rd: i32,
+        rs1: usize,
+        rd: usize,
     },
     XORI {
         imm: i32,
-        rs1: i32,
-        rd: i32,
+        rs1: usize,
+        rd: usize,
     },
     ORI {
         imm: i32,
-        rs1: i32,
-        rd: i32,
+        rs1: usize,
+        rd: usize,
     },
     ANDI {
         imm: i32,
-        rs1: i32,
-        rd: i32,
+        rs1: usize,
+        rd: usize,
     },
     SLLI {
         shamt: i32,
-        rs1: i32,
-        rd: i32,
+        rs1: usize,
+        rd: usize,
     },
     SRLI {
         shamt: i32,
-        rs1: i32,
-        rd: i32,
+        rs1: usize,
+        rd: usize,
     },
     SRAI {
         shamt: i32,
-        rs1: i32,
-        rd: i32,
+        rs1: usize,
+        rd: usize,
     },
     ADD {
-        rs2: i32,
-        rs1: i32,
-        rd: i32,
+        rs2: usize,
+        rs1: usize,
+        rd: usize,
     },
     SUB {
-        rs2: i32,
-        rs1: i32,
-        rd: i32,
+        rs2: usize,
+        rs1: usize,
+        rd: usize,
     },
     SLL {
-        rs2: i32,
-        rs1: i32,
-        rd: i32,
+        rs2: usize,
+        rs1: usize,
+        rd: usize,
     },
     SLT {
-        rs2: i32,
-        rs1: i32,
-        rd: i32,
+        rs2: usize,
+        rs1: usize,
+        rd: usize,
     },
     SLTU {
-        rs2: i32,
-        rs1: i32,
-        rd: i32,
+        rs2: usize,
+        rs1: usize,
+        rd: usize,
     },
     XOR {
-        rs2: i32,
-        rs1: i32,
-        rd: i32,
+        rs2: usize,
+        rs1: usize,
+        rd: usize,
     },
     SRL {
-        rs2: i32,
-        rs1: i32,
-        rd: i32,
+        rs2: usize,
+        rs1: usize,
+        rd: usize,
     },
     SRA {
-        rs2: i32,
-        rs1: i32,
-        rd: i32,
+        rs2: usize,
+        rs1: usize,
+        rd: usize,
     },
     OR {
-        rs2: i32,
-        rs1: i32,
-        rd: i32,
+        rs2: usize,
+        rs1: usize,
+        rd: usize,
     },
     AND {
-        rs2: i32,
-        rs1: i32,
-        rd: i32,
+        rs2: usize,
+        rs1: usize,
+        rd: usize,
     },
     FENCE {
         fm: i32,
         pred: i32,
         succ: i32,
-        rs1: i32,
-        rd: i32,
+        rs1: usize,
+        rd: usize,
     },
     ECALL,
     EBREAK,
@@ -231,43 +232,43 @@ pub(crate) enum Instruction {
 impl fmt::Display for Instruction {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
         match self {
-            Instruction::LUI { imm, rd } =>              write!(f, "LUI x{rd} #{imm:#x}"),
-            Instruction::AUIPC { imm, rd } =>            write!(f, "AUIPC x{rd} #{imm:#x}"),
-            Instruction::JAL { imm, rd } =>              write!(f, "JAL x{rd} #{imm:#x}"),
-            Instruction::JALR { imm, rs1, rd } =>   write!(f, "JALR x{rd} x{rs1} #{imm:#x}"),
-            Instruction::BEQ { imm, rs2, rs1 } =>   write!(f, "BEQ x{rs1} x{rs2} #{imm:#x}"),
-            Instruction::BNE { imm, rs2, rs1 } =>   write!(f, "BNE x{rs1} x{rs2} #{imm:#x}"),
-            Instruction::BLT { imm, rs2, rs1 } =>   write!(f, "BLT x{rs1} x{rs2} #{imm:#x}"),
-            Instruction::BGE { imm, rs2, rs1 } =>   write!(f, "BGE x{rs1} x{rs2} #{imm:#x}"),
-            Instruction::BLTU { imm, rs2, rs1 } =>  write!(f, "BLTU x{rs1} x{rs2} #{imm:#x}"),
-            Instruction::BGEU { imm, rs2, rs1 } =>  write!(f, "BGEU x{rs1} x{rs2} #{imm:#x}"),
-            Instruction::LB { imm, rs1, rd } =>     write!(f, "LB x{rd} x{rs1} #{imm:#x}"),
-            Instruction::LH { imm, rs1, rd } =>     write!(f, "LH x{rd} x{rs1} #{imm:#x}"),
-            Instruction::LW { imm, rs1, rd } =>     write!(f, "LW x{rd} x{rs1} #{imm:#x}"),
-            Instruction::LBU { imm, rs1, rd } =>    write!(f, "LBU x{rd} x{rs1} #{imm:#x}"),
-            Instruction::LHU { imm, rs1, rd } =>    write!(f, "LHU x{rd} x{rs1} #{imm:#x}"),
-            Instruction::SB { imm, rs2, rs1 } =>    write!(f, "SB x{rs1} x{rs2} #{imm:#x}"),
-            Instruction::SH { imm, rs2, rs1 } =>    write!(f, "SH x{rs1} x{rs2} #{imm:#x}"),
-            Instruction::SW { imm, rs2, rs1 } =>    write!(f, "SW x{rs1} x{rs2} #{imm:#x}"),
-            Instruction::ADDI { imm, rs1, rd } =>   write!(f, "ADDI x{rd} x{rs1} #{imm:#x}"),
-            Instruction::SLTI { imm, rs1, rd } =>   write!(f, "SLTI x{rd} x{rs1} #{imm:#x}"),
-            Instruction::SLTIU { imm, rs1, rd } =>  write!(f, "SLTIU x{rd} x{rs1} #{imm:#x}"),
-            Instruction::XORI { imm, rs1, rd } =>   write!(f, "XORI x{rd} x{rs1} #{imm:#x}"),
-            Instruction::ORI { imm, rs1, rd } =>    write!(f, "ORI x{rd} x{rs1} #{imm:#x}"),
-            Instruction::ANDI { imm, rs1, rd } =>   write!(f, "ANDI x{rd} x{rs1} #{imm:#x}"),
+            Instruction::LUI { imm, rd } => write!(f, "LUI x{rd} #{imm:#x}"),
+            Instruction::AUIPC { imm, rd } => write!(f, "AUIPC x{rd} #{imm:#x}"),
+            Instruction::JAL { imm, rd } => write!(f, "JAL x{rd} #{imm:#x}"),
+            Instruction::JALR { imm, rs1, rd } => write!(f, "JALR x{rd} x{rs1} #{imm:#x}"),
+            Instruction::BEQ { imm, rs2, rs1 } => write!(f, "BEQ x{rs1} x{rs2} #{imm:#x}"),
+            Instruction::BNE { imm, rs2, rs1 } => write!(f, "BNE x{rs1} x{rs2} #{imm:#x}"),
+            Instruction::BLT { imm, rs2, rs1 } => write!(f, "BLT x{rs1} x{rs2} #{imm:#x}"),
+            Instruction::BGE { imm, rs2, rs1 } => write!(f, "BGE x{rs1} x{rs2} #{imm:#x}"),
+            Instruction::BLTU { imm, rs2, rs1 } => write!(f, "BLTU x{rs1} x{rs2} #{imm:#x}"),
+            Instruction::BGEU { imm, rs2, rs1 } => write!(f, "BGEU x{rs1} x{rs2} #{imm:#x}"),
+            Instruction::LB { imm, rs1, rd } => write!(f, "LB x{rd} x{rs1} #{imm:#x}"),
+            Instruction::LH { imm, rs1, rd } => write!(f, "LH x{rd} x{rs1} #{imm:#x}"),
+            Instruction::LW { imm, rs1, rd } => write!(f, "LW x{rd} x{rs1} #{imm:#x}"),
+            Instruction::LBU { imm, rs1, rd } => write!(f, "LBU x{rd} x{rs1} #{imm:#x}"),
+            Instruction::LHU { imm, rs1, rd } => write!(f, "LHU x{rd} x{rs1} #{imm:#x}"),
+            Instruction::SB { imm, rs2, rs1 } => write!(f, "SB x{rs1} x{rs2} #{imm:#x}"),
+            Instruction::SH { imm, rs2, rs1 } => write!(f, "SH x{rs1} x{rs2} #{imm:#x}"),
+            Instruction::SW { imm, rs2, rs1 } => write!(f, "SW x{rs1} x{rs2} #{imm:#x}"),
+            Instruction::ADDI { imm, rs1, rd } => write!(f, "ADDI x{rd} x{rs1} #{imm:#x}"),
+            Instruction::SLTI { imm, rs1, rd } => write!(f, "SLTI x{rd} x{rs1} #{imm:#x}"),
+            Instruction::SLTIU { imm, rs1, rd } => write!(f, "SLTIU x{rd} x{rs1} #{imm:#x}"),
+            Instruction::XORI { imm, rs1, rd } => write!(f, "XORI x{rd} x{rs1} #{imm:#x}"),
+            Instruction::ORI { imm, rs1, rd } => write!(f, "ORI x{rd} x{rs1} #{imm:#x}"),
+            Instruction::ANDI { imm, rs1, rd } => write!(f, "ANDI x{rd} x{rs1} #{imm:#x}"),
             Instruction::SLLI { shamt, rs1, rd } => write!(f, "SLLI x{rd} x{rs1} {shamt}"),
             Instruction::SRLI { shamt, rs1, rd } => write!(f, "SRLI x{rd} x{rs1} {shamt}"),
             Instruction::SRAI { shamt, rs1, rd } => write!(f, "SRAI x{rd} x{rs1} {shamt}"),
-            Instruction::ADD { rs2, rs1, rd } =>    write!(f, "ADD x{rd} x{rs1} x{rs2}"),
-            Instruction::SUB { rs2, rs1, rd } =>    write!(f, "SUB x{rd} x{rs1} x{rs2}"),
-            Instruction::SLL { rs2, rs1, rd } =>    write!(f, "SLL x{rd} x{rs1} x{rs2}"),
-            Instruction::SLT { rs2, rs1, rd } =>    write!(f, "SLT x{rd} x{rs1} x{rs2}"),
-            Instruction::SLTU { rs2, rs1, rd } =>   write!(f, "SLTU x{rd} x{rs1} x{rs2}"),
-            Instruction::XOR { rs2, rs1, rd } =>    write!(f, "XOR x{rd} x{rs1} x{rs2}"),
-            Instruction::SRL { rs2, rs1, rd } =>    write!(f, "SRL x{rd} x{rs1} x{rs2}"),
-            Instruction::SRA { rs2, rs1, rd } =>    write!(f, "SRA x{rd} x{rs1} x{rs2}"),
-            Instruction::OR { rs2, rs1, rd } =>     write!(f, "OR x{rd} x{rs1} x{rs2}"),
-            Instruction::AND { rs2, rs1, rd } =>    write!(f, "AND x{rd} x{rs1} x{rs2}"),
+            Instruction::ADD { rs2, rs1, rd } => write!(f, "ADD x{rd} x{rs1} x{rs2}"),
+            Instruction::SUB { rs2, rs1, rd } => write!(f, "SUB x{rd} x{rs1} x{rs2}"),
+            Instruction::SLL { rs2, rs1, rd } => write!(f, "SLL x{rd} x{rs1} x{rs2}"),
+            Instruction::SLT { rs2, rs1, rd } => write!(f, "SLT x{rd} x{rs1} x{rs2}"),
+            Instruction::SLTU { rs2, rs1, rd } => write!(f, "SLTU x{rd} x{rs1} x{rs2}"),
+            Instruction::XOR { rs2, rs1, rd } => write!(f, "XOR x{rd} x{rs1} x{rs2}"),
+            Instruction::SRL { rs2, rs1, rd } => write!(f, "SRL x{rd} x{rs1} x{rs2}"),
+            Instruction::SRA { rs2, rs1, rd } => write!(f, "SRA x{rd} x{rs1} x{rs2}"),
+            Instruction::OR { rs2, rs1, rd } => write!(f, "OR x{rd} x{rs1} x{rs2}"),
+            Instruction::AND { rs2, rs1, rd } => write!(f, "AND x{rd} x{rs1} x{rs2}"),
             Instruction::FENCE {
                 fm,
                 pred,
@@ -280,6 +281,8 @@ impl fmt::Display for Instruction {
         }
     }
 }
+
+// At the moment I don't actually simulate these
 pub(crate) enum MicroSteps {
     AluOp0,     // (alu operation 0)
     MemStore,   // (memory store - RAM)
@@ -612,20 +615,20 @@ impl Instruction {
         }
     }
 
-    fn get_rs1(data: i32) -> i32 {
-        extract_bits!(data[20;16])
+    fn get_rs1(data: i32) -> usize {
+        extract_bits!(data[20;16]) as usize
     }
 
-    fn get_rs2(data: i32) -> i32 {
-        extract_bits!(data[20;16])
+    fn get_rs2(data: i32) -> usize {
+        extract_bits!(data[20;16]) as usize
     }
 
-    fn get_rd(data: i32) -> i32 {
-        extract_bits!(data[12;8])
+    fn get_rd(data: i32) -> usize {
+        extract_bits!(data[12;8]) as usize
     }
 
     fn get_shamt(data: i32) -> i32 {
-        Instruction::get_rs2(data)
+        Instruction::get_rs2(data) as i32
     }
 }
 
@@ -638,16 +641,16 @@ mod tests {
     #[test]
     fn immediate_i() {
         // I-Type
-        let inst_31: i32 = 0b1111111111111111111111_00000_0000_0;
-        let inst_30_25: i32 = 0b0000000000000000000000_11111_0000_0;
-        let inst_24_21: i32 = 0b0000000000000000000000_00000_1111_0;
-        let inst_20: i32 = 0b0000000000000000000000_00000_0000_1;
+        let inst_31 = 0b1111111111111111111111_00000_0000_0;
+        let inst_30_25 = 0b0000000000000000000000_11111_0000_0;
+        let inst_24_21 = 0b0000000000000000000000_00000_1111_0;
+        let inst_20 = 0b0000000000000000000000_00000_0000_1;
 
-        let imm_11_0: i32 = 0b111111111111_00000_000_00000_0000000;
-        let rs1: i32 = 0b000000000000_11111_000_00000_0000000;
-        let funct3: i32 = 0b000000000000_00000_111_00000_0000000;
-        let rd: i32 = 0b000000000000_00000_000_11111_0000000;
-        let opcode: i32 = 0b000000000000_00000_000_00000_1111111;
+        let imm_11_0 = 0b111111111111_00000_000_00000_0000000;
+        let rs1 = 0b000000000000_11111_000_00000_0000000;
+        let funct3 = 0b000000000000_00000_111_00000_0000000;
+        let rd = 0b000000000000_00000_000_11111_0000000;
+        let opcode = 0b000000000000_00000_000_00000_1111111;
 
         let non_imm = rs1 | funct3 | rd | opcode;
         assert_eq!(Immediate::from_i32(Immediate::I, non_imm), 0);
@@ -661,17 +664,17 @@ mod tests {
     #[test]
     fn immediate_s() {
         // S-Type
-        let inst_31: i32 = 0b1111111111111111111111_00000_0000_0;
-        let inst_30_25: i32 = 0b0000000000000000000000_11111_0000_0;
-        let inst_11_18: i32 = 0b0000000000000000000000_00000_1111_0;
-        let inst_7: i32 = 0b0000000000000000000000_00000_0000_1;
+        let inst_31 = 0b1111111111111111111111_00000_0000_0;
+        let inst_30_25 = 0b0000000000000000000000_11111_0000_0;
+        let inst_11_18 = 0b0000000000000000000000_00000_1111_0;
+        let inst_7 = 0b0000000000000000000000_00000_0000_1;
         //11_11111_1111_1
-        let imm_11_0: i32 = 0b1111111_00000_00000_000_00000_0000000;
-        let rs2: i32 = 0b0000000_11111_00000_000_00000_0000000;
-        let rs1: i32 = 0b0000000_00000_11111_000_00000_0000000;
-        let funct3: i32 = 0b0000000_00000_00000_111_00000_0000000;
-        let imm_4_0: i32 = 0b0000000_00000_00000_000_11111_0000000;
-        let opcode: i32 = 0b0000000_00000_00000_000_00000_1111111;
+        let imm_11_0 = 0b1111111_00000_00000_000_00000_0000000;
+        let rs2 = 0b0000000_11111_00000_000_00000_0000000;
+        let rs1 = 0b0000000_00000_11111_000_00000_0000000;
+        let funct3 = 0b0000000_00000_00000_111_00000_0000000;
+        let imm_4_0 = 0b0000000_00000_00000_000_11111_0000000;
+        let opcode = 0b0000000_00000_00000_000_00000_1111111;
 
         let non_imm = rs2 | rs1 | funct3 | opcode;
         assert_eq!(Immediate::from_i32(Immediate::S, non_imm), 0);
@@ -685,21 +688,21 @@ mod tests {
     #[test]
     fn immediate_b() {
         // B-Type
-        let inst_31: i32 = 0b111111111111111111111_00000_0000_0_0;
-        let inst_30_25: i32 = 0b000000000000000000000_11111_0000_0_0;
-        let inst_11_18: i32 = 0b000000000000000000000_00000_1111_0_0;
-        let inst_7: i32 = 0b000000000000000000000_00000_0000_1_0;
+        let inst_31 = 0b111111111111111111111_00000_0000_0_0;
+        let inst_30_25 = 0b000000000000000000000_11111_0000_0_0;
+        let inst_11_18 = 0b000000000000000000000_00000_1111_0_0;
+        let inst_7 = 0b000000000000000000000_00000_0000_1_0;
         //0b11_11111_1111_10
-        let imm_12: i32 = 0b1_000000_00000_00000_000_0000_0_0000000;
-        let imm_10_5: i32 = 0b0_111111_00000_00000_000_0000_0_0000000;
-        let rs2: i32 = 0b0_000000_11111_00000_000_0000_0_0000000;
-        let rs1: i32 = 0b0_000000_00000_11111_000_0000_0_0000000;
-        let funct3: i32 = 0b0_000000_00000_00000_111_0000_0_0000000;
-        let imm_4_0: i32 = 0b0_000000_00000_00000_000_1111_0_0000000;
-        let imm_11: i32 = 0b0_000000_00000_00000_000_0000_1_0000000;
-        let opcode: i32 = 0b0_000000_00000_00000_000_0000_0_1111111;
+        let imm_12 = 0b1_000000_00000_00000_000_0000_0_0000000;
+        let imm_10_5 = 0b0_111111_00000_00000_000_0000_0_0000000;
+        let rs2 = 0b0_000000_11111_00000_000_0000_0_0000000;
+        let rs1 = 0b0_000000_00000_11111_000_0000_0_0000000;
+        let funct3 = 0b0_000000_00000_00000_111_0000_0_0000000;
+        let imm_4_0 = 0b0_000000_00000_00000_000_1111_0_0000000;
+        let imm_11 = 0b0_000000_00000_00000_000_0000_1_0000000;
+        let opcode = 0b0_000000_00000_00000_000_0000_0_1111111;
 
-        let non_imm = rs2 | rs1 | funct3 | opcode;
+        let non_imm = rs2 as i32 | rs1 as i32 | funct3 | opcode;
         assert_eq!(Immediate::from_i32(Immediate::B, non_imm), 0);
 
         assert_eq!(
