@@ -6,46 +6,62 @@ impl Pineapple {
         let mut registers = self.general_register.write().unwrap();
         let mut pc = self.program_counter.write().unwrap();
         match instruction {
-            Instruction::LUI { imm, rd } => todo!(),
-            Instruction::AUIPC { imm, rd } => todo!(),
-            Instruction::JAL { imm, rd } => todo!(),
-            Instruction::JALR { imm, rs1, rd } => {
-                todo!()
+            Instruction::LUI { imm, rd } => {
+                if *rd == 0 {
+                    return;
+                }
+                registers[*rd] = *imm;
             },
+            Instruction::AUIPC { imm, rd } => {
+                if *rd == 0 {
+                    return;
+                }
+                registers[*rd] = *pc as i32 + *imm;
+            }
+            Instruction::JAL { imm, rd } => {
+                let target_address = *pc as i32 + *imm;
+                if *rd != 0 {
+                    registers[*rd] = *pc as i32 + 1
+                }
+                *pc = target_address as usize;
+            }
+            Instruction::JALR { imm, rs1, rd } => {
+                let target_address = (registers[*rs1] + *imm) & -2;
+                if *rd != 0 {
+                    registers[*rd] = *pc as i32 + 1
+                }
+                *pc = target_address as usize;
+            }
             Instruction::BEQ { imm, rs2, rs1 } => {
                 if registers[*rs1] == registers[*rs2] {
                     let (result, _) = (*pc as i32).overflowing_add(*imm);
                     *pc = result as usize;
                 }
-
-            },
+            }
             Instruction::BNE { imm, rs2, rs1 } => {
                 if registers[*rs1] != registers[*rs2] {
                     let (result, _) = (*pc as i32).overflowing_add(*imm);
                     *pc = result as usize;
                 }
-
-            },
+            }
             Instruction::BLT { imm, rs2, rs1 } => {
                 if registers[*rs1] < registers[*rs2] {
                     let (result, _) = (*pc as i32).overflowing_add(*imm);
                     *pc = result as usize;
                 }
-
-            },
+            }
             Instruction::BGE { imm, rs2, rs1 } => {
                 if registers[*rs1] >= registers[*rs2] {
                     let (result, _) = (*pc as i32).overflowing_add(*imm);
                     *pc = result as usize;
                 }
-            },
+            }
             Instruction::BLTU { imm, rs2, rs1 } => {
                 if (registers[*rs1] as u32) < (registers[*rs2] as u32) {
                     let (result, _) = (*pc as i32).overflowing_add(*imm);
                     *pc = result as usize;
                 }
-
-            },
+            }
             Instruction::BGEU { imm, rs2, rs1 } => {
                 if (registers[*rs1] as u32) >= (registers[*rs2] as u32) {
                     let (result, _) = (*pc as i32).overflowing_add(*imm);
