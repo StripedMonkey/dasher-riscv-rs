@@ -35,7 +35,7 @@ pub(crate) fn sign_extend(instruction: i32, offset: usize) -> i32 {
     shifted >> (32 - offset)
 }
 
-pub(crate) enum Instruction {
+pub enum Instruction {
     LUI {
         imm: i32,
         rd: usize,
