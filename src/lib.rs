@@ -1,5 +1,3 @@
-#![feature(format_args_capture)]
-
 use std::sync::RwLock;
 
 use instruction::Instruction;
@@ -16,6 +14,11 @@ pub struct Pineapple {
     instruction_memory: RwLock<Vec<i32>>,
     data_memory: memory::MemorySystem,
 }
+impl Default for Pineapple {
+    fn default() -> Self {
+        Self::new()
+    }
+}
 
 impl Pineapple {
     pub fn new() -> Self {
@@ -28,26 +31,26 @@ impl Pineapple {
         }
     }
 
-    pub async fn get_video_memory(&self) -> Result<Vec<i32>, ()> {
+    pub fn get_video_memory(&self) -> Result<Vec<i32>, ()> {
         // Lazy
         self.data_memory.dump_memory_range(0x40000000, 0x400007FF)
     }
 
-    pub async fn get_program_counter(&self) -> Result<usize, ()> {
+    pub fn get_program_counter(&self) -> Result<usize, ()> {
         let lock = self.program_counter.read();
         Ok(*lock.unwrap_or(Err(())?))
     }
 
-    pub async fn get_registers(&self) -> Result<Vec<i32>, ()> {
+    pub fn get_registers(&self) -> Result<Vec<i32>, ()> {
         let lock = self.general_register.read();
-        Ok(lock.unwrap_or(Err(())?).clone())
+        Ok(lock.unwrap_or(return Err(())).clone())
     }
 
-    pub async fn get_data_range(&self, start: usize, stop: usize) -> Result<Vec<i32>, ()> {
+    pub fn get_data_range(&self, start: usize, stop: usize) -> Result<Vec<i32>, ()> {
         self.data_memory.dump_memory_range(start, stop)
     }
 
-    pub async fn get_instruction_range(&self, start: usize, stop: usize) -> Result<Vec<i32>, ()> {
+    pub fn get_instruction_range(&self, start: usize, stop: usize) -> Result<Vec<i32>, ()> {
         let memory = match self.instruction_memory.try_read() {
             Ok(rw_lock) => rw_lock,
             Err(_) => todo!(),
@@ -56,7 +59,7 @@ impl Pineapple {
         result.reserve(stop - start);
 
         for n in start..stop {
-            result.push(*memory.get(n).ok_or(Err(())?)?);
+            result.push(*memory.get(n).expect("Failed to get address"));
         }
         Ok(result)
     }
@@ -79,6 +82,7 @@ impl Pineapple {
         let addr = *self.program_counter.read().unwrap();
         let instr = Instruction::from_i32(self.instruction_memory.read().unwrap()[addr]);
         self.process_instruction(&instr);
+        *self.program_counter.write().unwrap() = addr +1;
         instr
     }
 }
@@ -92,8 +96,8 @@ mod tests {
         println!("Test");
         let mut pineapple = Pineapple::new();
         for _ in 0..5 {
-            let instruction= pineapple.step();
-            println!("{}",instruction)
+            let instruction = pineapple.step();
+            println!("{}", instruction)
         }
     }
 }

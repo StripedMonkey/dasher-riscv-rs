@@ -6,233 +6,233 @@ impl Pineapple {
         let mut registers = self.general_register.write().unwrap();
         let mut pc = self.program_counter.write().unwrap();
         match instruction {
-            Instruction::LUI { imm, rd } => {
-                if *rd == 0 {
+            Instruction::LUI (i) => {
+                if i.rd == 0 {
                     return;
                 }
-                registers[*rd] = *imm;
-            },
-            Instruction::AUIPC { imm, rd } => {
-                if *rd == 0 {
-                    return;
-                }
-                registers[*rd] = *pc as i32 + *imm;
+                registers[i.rd] = i.imm;
             }
-            Instruction::JAL { imm, rd } => {
-                let target_address = *pc as i32 + *imm;
-                if *rd != 0 {
-                    registers[*rd] = *pc as i32 + 1
+            Instruction::AUIPC (i) => {
+                if i.rd == 0 {
+                    return;
+                }
+                registers[i.rd] = *pc as i32 + i.imm;
+            }
+            Instruction::JAL (i) => {
+                let target_address = *pc as i32 + i.imm;
+                if i.rd != 0 {
+                    registers[i.rd] = *pc as i32 + 1
                 }
                 *pc = target_address as usize;
             }
-            Instruction::JALR { imm, rs1, rd } => {
-                let target_address = (registers[*rs1] + *imm) & -2;
-                if *rd != 0 {
-                    registers[*rd] = *pc as i32 + 1
+            Instruction::JALR (i) => {
+                let target_address = (registers[i.rs1] + i.imm) & -2;
+                if i.rd != 0 {
+                    registers[i.rd] = *pc as i32 + 1
                 }
                 *pc = target_address as usize;
             }
-            Instruction::BEQ { imm, rs2, rs1 } => {
-                if registers[*rs1] == registers[*rs2] {
-                    let (result, _) = (*pc as i32).overflowing_add(*imm);
+            Instruction::BEQ (i) => {
+                if registers[i.rs1] == registers[i.rs2] {
+                    let (result, _) = (*pc as i32).overflowing_add(i.imm);
                     *pc = result as usize;
                 }
             }
-            Instruction::BNE { imm, rs2, rs1 } => {
-                if registers[*rs1] != registers[*rs2] {
-                    let (result, _) = (*pc as i32).overflowing_add(*imm);
+            Instruction::BNE (i) => {
+                if registers[i.rs1] != registers[i.rs2] {
+                    let (result, _) = (*pc as i32).overflowing_add(i.imm);
                     *pc = result as usize;
                 }
             }
-            Instruction::BLT { imm, rs2, rs1 } => {
-                if registers[*rs1] < registers[*rs2] {
-                    let (result, _) = (*pc as i32).overflowing_add(*imm);
+            Instruction::BLT (i) => {
+                if registers[i.rs1] < registers[i.rs2] {
+                    let (result, _) = (*pc as i32).overflowing_add(i.imm);
                     *pc = result as usize;
                 }
             }
-            Instruction::BGE { imm, rs2, rs1 } => {
-                if registers[*rs1] >= registers[*rs2] {
-                    let (result, _) = (*pc as i32).overflowing_add(*imm);
+            Instruction::BGE (i) => {
+                if registers[i.rs1] >= registers[i.rs2] {
+                    let (result, _) = (*pc as i32).overflowing_add(i.imm);
                     *pc = result as usize;
                 }
             }
-            Instruction::BLTU { imm, rs2, rs1 } => {
-                if (registers[*rs1] as u32) < (registers[*rs2] as u32) {
-                    let (result, _) = (*pc as i32).overflowing_add(*imm);
+            Instruction::BLTU (i) => {
+                if (registers[i.rs1] as u32) < (registers[i.rs2] as u32) {
+                    let (result, _) = (*pc as i32).overflowing_add(i.imm);
                     *pc = result as usize;
                 }
             }
-            Instruction::BGEU { imm, rs2, rs1 } => {
-                if (registers[*rs1] as u32) >= (registers[*rs2] as u32) {
-                    let (result, _) = (*pc as i32).overflowing_add(*imm);
+            Instruction::BGEU (i) => {
+                if (registers[i.rs1] as u32) >= (registers[i.rs2] as u32) {
+                    let (result, _) = (*pc as i32).overflowing_add(i.imm);
                     *pc = result as usize;
                 }
             }
-            Instruction::LB { imm, rs1, rd } => {
-                let offset = (registers[*rs1] + imm) as usize;
+            Instruction::LB (i) => {
+                let offset = (registers[i.rs1] +i.imm) as usize;
                 let data = self.data_memory.read_i32(offset);
-                registers[*rd] = extract_bits!(@extend data[7;0]);
+                registers[i.rd] = extract_bits!(@extend data[7;0]);
             }
-            Instruction::LH { imm, rs1, rd } => {
-                let offset = (registers[*rs1] + imm) as usize;
+            Instruction::LH (i) => {
+                let offset = (registers[i.rs1] +i.imm) as usize;
                 let data = self.data_memory.read_i32(offset);
-                registers[*rd] = extract_bits!(@extend data[15;0]);
+                registers[i.rd] = extract_bits!(@extend data[15;0]);
             }
-            Instruction::LW { imm, rs1, rd } => {
-                registers[*rd] = self.data_memory.read_i32((registers[*rs1] + imm) as usize)
+            Instruction::LW (i) => {
+                registers[i.rd] = self.data_memory.read_i32((registers[i.rs1] +i.imm) as usize)
             }
-            Instruction::LBU { imm, rs1, rd } => {
-                let offset = (registers[*rs1] + imm) as usize;
+            Instruction::LBU (i) => {
+                let offset = (registers[i.rs1] +i.imm) as usize;
                 let data = self.data_memory.read_i32(offset);
-                registers[*rd] = extract_bits!(data[15;0]);
+                registers[i.rd] = extract_bits!(data[15;0]);
             }
-            Instruction::LHU { imm, rs1, rd } => {
-                let destination = (registers[*rs1] + imm) as usize;
+            Instruction::LHU (i) => {
+                let destination = (registers[i.rs1] +i.imm) as usize;
                 let data = self.data_memory.read_i32(destination);
-                registers[*rd] = extract_bits!(data[15;0]);
+                registers[i.rd] = extract_bits!(data[15;0]);
             }
-            Instruction::SB { imm, rs2, rs1 } => {
-                let destination = (registers[*rs1] + imm) as usize;
+            Instruction::SB (i) => {
+                let destination = (registers[i.rs1] +i.imm) as usize;
                 self.data_memory
-                    .write_i32(destination, registers[*rs2] & 0xFF);
+                    .write_i32(destination, registers[i.rs2] & 0xFF);
             }
-            Instruction::SH { imm, rs2, rs1 } => {
-                let destination = (registers[*rs1] + imm) as usize;
+            Instruction::SH (i) => {
+                let destination = (registers[i.rs1] +i.imm) as usize;
                 self.data_memory
-                    .write_i32(destination, registers[*rs2] & 0xFFFF);
+                    .write_i32(destination, registers[i.rs2] & 0xFFFF);
             }
-            Instruction::SW { imm, rs2, rs1 } => {
-                let destination = (registers[*rs1] + imm) as usize;
-                self.data_memory.write_i32(destination, registers[*rs2]);
+            Instruction::SW (i) => {
+                let destination = (registers[i.rs1] +i.imm) as usize;
+                self.data_memory.write_i32(destination, registers[i.rs2]);
             }
-            Instruction::ADDI { imm, rs1, rd } => {
-                if *rd == 0 {
+            Instruction::ADDI (i) => {
+                if i.rd == 0 {
                     return;
                 }
-                let (value, _) = registers[*rs1].overflowing_add(*imm);
-                registers[*rd] = value;
+                let (value, _) = registers[i.rs1].overflowing_add(i.imm);
+                registers[i.rd] = value;
             }
-            Instruction::SLTI { imm, rs1, rd } => {
-                if *rd == 0 {
+            Instruction::SLTI (i) => {
+                if i.rd == 0 {
                     return;
                 }
-                registers[*rd as usize] = match registers[*rs1] < *imm {
+                registers[i.rd as usize] = match registers[i.rs1] < i.imm {
                     true => 1,
                     false => 0,
                 };
             }
-            Instruction::SLTIU { imm, rs1, rd } => {
-                if *rd == 0 {
+            Instruction::SLTIU (i) => {
+                if i.rd == 0 {
                     return;
                 }
-                registers[*rd as usize] = match (registers[*rs1] as u32) < (*imm as u32) {
+                registers[i.rd as usize] = match (registers[i.rs1] as u32) < (i.imm as u32) {
                     true => 1,
                     false => 0,
                 };
             }
-            Instruction::XORI { imm, rs1, rd } => {
-                if *rd == 0 {
+            Instruction::XORI (i) => {
+                if i.rd == 0 {
                     return;
                 }
-                registers[*rd] = registers[*rs1] ^ imm;
+                registers[i.rd] = registers[i.rs1] ^i.imm;
             }
-            Instruction::ORI { imm, rs1, rd } => {
-                if *rd == 0 {
+            Instruction::ORI (i) => {
+                if i.rd == 0 {
                     return;
                 }
-                registers[*rd] = registers[*rs1] | imm;
+                registers[i.rd] = registers[i.rs1] |i.imm;
             }
-            Instruction::ANDI { imm, rs1, rd } => {
-                if *rd == 0 {
+            Instruction::ANDI (i) => {
+                if i.rd == 0 {
                     return;
                 }
-                registers[*rd] = registers[*rs1] & imm;
+                registers[i.rd] = registers[i.rs1] &i.imm;
             }
-            Instruction::SLLI { shamt, rs1, rd } => {
-                if *rd == 0 {
+            Instruction::SLLI (i) => {
+                if i.rd == 0 {
                     return;
                 }
-                registers[*rd] = registers[*rs1] << shamt;
+                registers[i.rd] = registers[i.rs1] << i.imm;
             }
-            Instruction::SRLI { shamt, rs1, rd } => {
-                if *rd == 0 {
+            Instruction::SRLI (i) => {
+                if i.rd == 0 {
                     return;
                 }
-                registers[*rd] = ((registers[*rs1] as u32) >> shamt) as i32;
+                registers[i.rd] = ((registers[i.rs1] as u32) >> i.imm) as i32;
             }
-            Instruction::SRAI { shamt, rs1, rd } => {
-                if *rd == 0 {
+            Instruction::SRAI (i) => {
+                if i.rd == 0 {
                     return;
                 }
-                registers[*rd] = registers[*rs1] >> shamt;
+                registers[i.rd] = registers[i.rs1] >> i.imm;
             }
-            Instruction::ADD { rs2, rs1, rd } => {
-                if *rd == 0 {
+            Instruction::ADD (i) => {
+                if i.rd == 0 {
                     return;
                 }
-                let (result, _) = registers[*rs1].overflowing_add(registers[*rs2]);
-                registers[*rd] = result;
+                let (result, _) = registers[i.rs1].overflowing_add(registers[i.rs2]);
+                registers[i.rd] = result;
             }
-            Instruction::SUB { rs2, rs1, rd } => {
-                if *rd == 0 {
+            Instruction::SUB (i) => {
+                if i.rd == 0 {
                     return;
                 }
-                let (result, _) = registers[*rs1].overflowing_sub(registers[*rs2]);
-                registers[*rd] = result;
+                let (result, _) = registers[i.rs1].overflowing_sub(registers[i.rs2]);
+                registers[i.rd] = result;
             }
-            Instruction::SLL { rs2, rs1, rd } => {
+            Instruction::SLL (i) => {
                 // Lower five bits
-                registers[*rd] = registers[*rs1] << (registers[*rs2] & 0x1F)
+                registers[i.rd] = registers[i.rs1] << (registers[i.rs2] & 0x1F)
             }
-            Instruction::SLT { rs2, rs1, rd } => {
-                if *rd == 0 {
+            Instruction::SLT (i) => {
+                if i.rd == 0 {
                     return;
                 }
-                registers[*rd] = match registers[*rs1] < registers[*rs2] {
+                registers[i.rd] = match registers[i.rs1] < registers[i.rs2] {
                     true => 1,
                     false => 0,
                 }
             }
-            Instruction::SLTU { rs2, rs1, rd } => {
-                if *rd == 0 {
+            Instruction::SLTU (i) => {
+                if i.rd == 0 {
                     return;
                 }
-                registers[*rd] = match (registers[*rs1] as u32) < (registers[*rs2] as u32) {
+                registers[i.rd] = match (registers[i.rs1] as u32) < (registers[i.rs2] as u32) {
                     true => 1,
                     false => 0,
                 }
             }
-            Instruction::XOR { rs2, rs1, rd } => {
-                if *rd == 0 {
+            Instruction::XOR (i) => {
+                if i.rd == 0 {
                     return;
                 }
-                registers[*rd] = registers[*rs1] ^ registers[*rs2];
+                registers[i.rd] = registers[i.rs1] ^ registers[i.rs2];
             }
-            Instruction::SRL { rs2, rs1, rd } => {
-                if *rd == 0 {
+            Instruction::SRL (i) => {
+                if i.rd == 0 {
                     return;
                 }
                 // Specifically uses the lower 5 bits only
-                registers[*rd] = (registers[*rs1] as u32 >> (registers[*rs2] & 0b11111)) as i32
+                registers[i.rd] = (registers[i.rs1] as u32 >> (registers[i.rs2] & 0b11111)) as i32
             }
-            Instruction::SRA { rs2, rs1, rd } => {
-                if *rd == 0 {
+            Instruction::SRA (i) => {
+                if i.rd == 0 {
                     return;
                 }
                 // Specifically uses the lower 5 bits only
-                registers[*rd] = registers[*rs1] >> (registers[*rs2] & 0b11111)
+                registers[i.rd] = registers[i.rs1] >> (registers[i.rs2] & 0b11111)
             }
-            Instruction::OR { rs2, rs1, rd } => {
-                if *rd == 0 {
+            Instruction::OR (i) => {
+                if i.rd == 0 {
                     return;
                 }
-                registers[*rd] = registers[*rs1] | registers[*rs2];
+                registers[i.rd] = registers[i.rs1] | registers[i.rs2];
             }
-            Instruction::AND { rs2, rs1, rd } => {
-                if *rd == 0 {
+            Instruction::AND (i) => {
+                if i.rd == 0 {
                     return;
                 }
-                registers[*rd] = registers[*rs1] & registers[*rs2];
+                registers[i.rd] = registers[i.rs1] & registers[i.rs2];
             }
             Instruction::FENCE {
                 fm,
@@ -240,7 +240,16 @@ impl Pineapple {
                 succ,
                 rs1,
                 rd,
-            } => todo!(),
+            } => {
+                unimplemented!(
+                    "Unimplemented instruction! {}{}{}{}{}",
+                    fm,
+                    pred,
+                    succ,
+                    rs1,
+                    rd
+                )
+            }
             Instruction::ECALL => todo!(),
             Instruction::EBREAK => todo!(),
         }

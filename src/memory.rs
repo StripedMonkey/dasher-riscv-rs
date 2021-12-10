@@ -1,15 +1,15 @@
+use byteorder::{ByteOrder, LittleEndian};
 use std::{sync::RwLock, vec};
-
 pub(crate) struct MemorySystem {
-    ram: RwLock<Vec<i32>>,
-    video_memory: RwLock<Vec<i32>>,
+    ram: RwLock<Vec<i8>>,
+    video_memory: RwLock<Vec<i8>>,
 }
 
 impl MemorySystem {
     pub fn new() -> Self {
         Self {
-            ram: RwLock::new(vec![0; 524_288]),
-            video_memory: RwLock::new(vec![0; 2048]),
+            ram: RwLock::new(vec![0; 524_288 * 4]),
+            video_memory: RwLock::new(vec![0; 2048 * 4]),
         }
     }
     pub fn read_i32(&self, idx: usize) -> i32 {
@@ -17,7 +17,7 @@ impl MemorySystem {
             0x00000000..=0x0001FFFF => {
                 // RAM
                 let contents = self.ram.read().unwrap();
-                contents[idx]
+                read_slice(&contents[idx..(idx + 5)])
             }
             0x00020000..=0x3FFFFFFF => {
                 // Reserved Space
@@ -26,9 +26,9 @@ impl MemorySystem {
             0x40000000..=0x400007FF => {
                 // Video RAM
                 let contents = self.ram.read().unwrap();
-                contents[idx]
+                read_slice(&contents[idx..(idx + 5)])
             }
-            0x40000000..=0x7FFFFFFF => {
+            0x40000800..=0x7FFFFFFF => {
                 // Reserved Space
                 unimplemented!("Reserved Space is Unimplemented!")
             }
@@ -49,7 +49,7 @@ impl MemorySystem {
             0x00000000..=0x0001FFFF => {
                 // RAM
                 let mut contents = self.ram.write().unwrap();
-                contents[idx] = data;
+                write_slice(&mut contents[idx..(idx + 5)], data);
             }
             0x00020000..=0x3FFFFFFF => {
                 // Reserved Space
@@ -58,9 +58,9 @@ impl MemorySystem {
             0x40000000..=0x400007FF => {
                 // Video RAM
                 let mut contents = self.video_memory.write().unwrap();
-                contents[idx] = data;
+                write_slice(&mut contents[idx..(idx + 5)], data);
             }
-            0x40000000..=0x7FFFFFFF => {
+            0x40000800..=0x7FFFFFFF => {
                 // Reserved Space
                 unimplemented!("Attempted to write out of bounds!")
             }
@@ -83,18 +83,47 @@ impl MemorySystem {
         let mut dump: Vec<i32> = Vec::new();
         if start < 0x00020000 && stop < 0x00020000 {
             let contents = self.ram.read().unwrap();
-            for i in start..stop {
-                dump.push(contents[i]);
+            for i in (start..stop).step_by(4) {
+                dump.push(read_slice(&contents[i..(i + 5)]));
             }
             return Ok(dump);
         }
         if start < 0x40000000 && stop < 0x40000000 {
             let contents = self.video_memory.read().unwrap();
-            for i in start..stop {
-                dump.push(contents[i])
+            for i in (start..stop).step_by(4) {
+                dump.push(read_slice(&contents[i..(i + 5)]));
             }
             return Ok(dump);
         }
         Err(())
+    }
+}
+
+impl Default for MemorySystem {
+    fn default() -> Self {
+        Self::new()
+    }
+}
+
+fn read_slice(slice: &[i8]) -> i32 {
+    let u8slice = conv(slice);
+
+    LittleEndian::read_i32(u8slice)
+}
+
+fn write_slice(slice: &mut [i8], contents: i32) {
+    LittleEndian::write_i32(conv_mut(slice), contents);
+}
+
+fn conv_mut<'a>(p: &'a mut [i8]) -> &'a mut [u8] {
+    // Safety: this is fine since they're equivilant size/shapes
+    unsafe {
+        &mut *(p as *mut [i8] as *mut [u8])
+    }
+}
+fn conv<'a>(p: &'a [i8]) -> &'a [u8] {
+    // Safety: this is fine since they're equivilant size/shapes
+    unsafe {
+        &*(p as *const [i8] as *const [u8])
     }
 }
